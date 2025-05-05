@@ -1,23 +1,44 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../../utils/connectDb');
 
-const Schema = mongoose.Schema;
+const Role = sequelize.define('Role', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    permissions: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        defaultValue: []
+    },
+    status: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
+    created_by: {
+        type: DataTypes.STRING
+    },
+    updated_by: {
+        type: DataTypes.STRING
+    }
+}, {
+    tableName: 'roles',
+    timestamps: true,
+    paranoid: true, // Adds deletedAt for soft deletes
+    defaultScope: {
+        where: {
+            deletedAt: null
+        }
+    }
+});
 
-const RoleSchema = new Schema(
-  {
-    name: { type: String, required: true, unique: true }, 
-    description: { type: String, required: true }, 
-    //group_id: { type: mongoose.Schema.Types.ObjectId,ref: 'Group',unique: true  },
-    permissions: { type: [String], required: false },
-    status: { type: Boolean,default: true},
-    isDeleted: { type: Boolean, default: false }, 
-    created_by: { type: String, required: false },
-    updated_by: { type: String, required: false },
-  },
-  {
-    timestamps: true, 
-  }
-);
-
-const RoleModel = mongoose.model("Role", RoleSchema);
-
-module.exports = RoleModel;
+module.exports = Role;

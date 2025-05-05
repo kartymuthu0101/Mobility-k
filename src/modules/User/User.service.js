@@ -1,13 +1,20 @@
 const BaseService = require("../../common/BaseService.js");
-const UserModel = require("./User.model.js");
+const User = require("./User.model.js");
+const Role = require("../Roles/Role.model.js");
 
 class UserService extends BaseService {
     constructor() {
-        super(UserModel);
+        super(User);
     }
 
     async findByEmail(email) {
-        return this.model.findOne({ email }).populate('roleId');
+        return this.model.findOne({
+            where: { email },
+            include: [{
+                model: Role,
+                as: 'role'
+            }]
+        });
     }
 }
 

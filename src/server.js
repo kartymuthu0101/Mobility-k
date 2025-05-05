@@ -1,14 +1,18 @@
 const express = require("express");
-const connectDb = require("./utils/connectDb.js");
+const { connectDb } = require("./utils/connectDb.js");
 const router = require("./routes/index.js");
 const swagger = require("./utils/swagger.js");
 const cors = require("cors");
 const { port } = require("./config.js");
 
+// Import model associations
+require('./models/index');
+
 (async function server() {
     try {
         const app = express();
 
+        // Connect to PostgreSQL with Sequelize
         await connectDb();
 
         app.use(express.json());
@@ -16,9 +20,7 @@ const { port } = require("./config.js");
         swagger(app);
         app.use(cors())
         
-
         app.use("/api", router);
-
 
         app.listen(port, () => console.info(`Server is running on port ${port}`))
 
@@ -26,4 +28,3 @@ const { port } = require("./config.js");
         console.error("ERROR", error)
     }
 })();
-

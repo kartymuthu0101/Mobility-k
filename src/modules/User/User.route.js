@@ -104,7 +104,7 @@ userRouter.post('/create', [validator.userCreateInput], userController.create);
  *             EncryptedPayload:
  *               summary: Encrypted login input
  *               value:
- *                 input: "U2FsdGVkX1/uxSKJ1hp8tCI1+24k4s/CaaJXoBHrLgYHrSUlEYCIAaHHnvo5ccP0GklZ48qF8yw5G6CcN14VN8wEuTLHNzwJMXKqCHFZQbs="
+ *                 input: "U2FsdGVkX1/abcdEncryptedStringHereXYZ=="
  *     responses:
  *       200:
  *         description: User logged in successfully
@@ -250,5 +250,5 @@ userRouter.post('/create', [validator.userCreateInput], userController.create);
  *                     example: "email"
  */
 
-userRouter.post('/login', [validator.loginInputValidation], errHandle(userController.login));
+userRouter.post('/login', [validator.loginInputValidation],errHandle(userController.login));
 module.exports = userRouter;

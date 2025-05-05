@@ -1,31 +1,68 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const Schema = mongoose.Schema;
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../../utils/connectDb');
+const bcrypt = require('bcrypt');
 
-const UserSchema = new Schema({
-    username: { type: String, required: true },
-    email: { type: String },
-    passwordHash: { type: String, required: true }, 
-    status: { type: Boolean, default: true }, 
-    roleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Role' },
-    isDeleted: { type: Boolean, default: false }, 
-    createdBy: { type: Date }, 
-    updatedBy: { type: Date },
-}, {
-    timestamps: true 
-});
-
-UserSchema.pre('save', async function (next) {
-    if (this.isModified('passwordHash')) {
-        const salt = await bcrypt.genSalt(10);
-        this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    username: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+        validate: {
+            isEmail: true
+        }
+    },
+    passwordHash: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    status: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
+    createdBy: {
+        type: DataTypes.DATE
+    },
+    updatedBy: {
+        type: DataTypes.DATE
     }
-    next();
+}, {
+    tableName: 'users',
+    timestamps: true,
+    paranoid: true, // This will add deletedAt for soft deletes
+    defaultScope: {
+        where: {
+            deletedAt: null
+        }
+    }
 });
 
-UserSchema.methods.comparePassword = function (password) {
+// Instance method for comparing password
+User.prototype.comparePassword = async function(password) {
     return bcrypt.compare(password, this.passwordHash);
 };
 
-const UserModel = mongoose.model("User", UserSchema);
-module.exports = UserModel;
+// Hook for hashing password before save
+User.beforeCreate(async (user) => {
+    if (user.changed('passwordHash')) {
+        const salt = await bcrypt.genSalt(10);
+        user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
+    }
+});
+
+User.beforeUpdate(async (user) => {
+    if (user.changed('passwordHash')) {
+        const salt = await bcrypt.genSalt(10);
+        user.passwordHash = await bcrypt.hash(user.passwordHash, salt);
+    }
+});
+
+module.exports = User;

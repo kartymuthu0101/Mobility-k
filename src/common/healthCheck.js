@@ -1,10 +1,11 @@
-const { default: mongoose } = require("mongoose");
-const connectDb = require("../utils/connectDb");
+const { sequelize, connectDb } = require("../utils/connectDb");
 
 const healthcheck = async (req, res) => {
     try {
         // Check DB connection
-        if (mongoose.connection.readyState !== 1) {
+        try {
+            await sequelize.authenticate();
+        } catch (error) {
             await connectDb(); // Reconnect if not connected
         }
 

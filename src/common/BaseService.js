@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+
 class BaseService {
     model;
 
@@ -7,9 +9,10 @@ class BaseService {
 
     async getAll(condition = {}, returnOption = {}) {
         try {
-            return await this.model.find(condition)
-                .lean(returnOption.lean || false)
-                .select(returnOption.select || '');
+            return await this.model.findAll({
+                where: condition,
+                ...this._processReturnOptions(returnOption)
+            });
         } catch (error) {
             throw error;
         }
@@ -17,9 +20,10 @@ class BaseService {
 
     async getOne(condition = {}, returnOption = {}) {
         try {
-            return await this.model.findOne(condition)
-                .lean(returnOption.lean || false)
-                .select(returnOption.select || '');
+            return await this.model.findOne({
+                where: condition,
+                ...this._processReturnOptions(returnOption)
+            });
         } catch (error) {
             throw error;
         }
@@ -27,9 +31,14 @@ class BaseService {
 
     async getByIds(ids = [], returnOption = {}) {
         try {
-            return await this.model.find({ _id: { $in: ids } })
-                .lean(returnOption.lean || false)
-                .select(returnOption.select || '');
+            return await this.model.findAll({
+                where: {
+                    id: {
+                        [Op.in]: ids
+                    }
+                },
+                ...this._processReturnOptions(returnOption)
+            });
         } catch (error) {
             throw error;
         }
@@ -37,32 +46,32 @@ class BaseService {
 
     async create(payload, returnOption = {}, options = {}) {
         try {
-            const doc = new this.model(payload);
-            const saved = await doc.save(options);
-            return returnOption.lean ? saved.toObject() : saved;
+            return await this.model.create(payload, options);
         } catch (error) {
             throw error;
         }
     }
 
-    async bulkCreate(payloads, returnOption = {}, options = { ordered: true }) {
-        const { lean } = returnOption;
-        console.log("first", payloads)
+    async bulkCreate(payloads, returnOption = {}, options = { validate: true }) {
+        console.log("first", payloads);
         try {
-            const result = await this.model.insertMany(payloads, options);
-            return lean ? result.map(doc => doc.toObject()) : result;
+            return await this.model.bulkCreate(payloads, options);
         } catch (error) {
             throw error;
         }
     }
 
-    async update(id, updateData, returnOption = {}, options = { new: true, runValidators: true }) {
+    async update(id, updateData, returnOption = {}, options = {}) {
         try {
-            return await this.model.findByIdAndUpdate(
-                id,
-                { $set: updateData },
-                options
-            ).lean(returnOption.lean || false);
+            const instance = await this.model.findByPk(id);
+            if (!instance) {
+                throw new Error('Record not found');
+            }
+            
+            return await instance.update(updateData, {
+                ...options,
+                ...this._processReturnOptions(returnOption)
+            });
         } catch (error) {
             throw error;
         }
@@ -70,13 +79,13 @@ class BaseService {
 
     async delete(id, returnOption = {}) {
         try {
-            return await this.model.findByIdAndUpdate(
-                id,
-                { 
-                    $set: { isDeleted: true, deletedAt: new Date() } 
-                },
-                { new: true }
-            ).lean(returnOption.lean || false);
+            const instance = await this.model.findByPk(id);
+            if (!instance) {
+                throw new Error('Record not found');
+            }
+            
+            // Use Sequelize paranoid delete (soft delete)
+            return await instance.destroy();
         } catch (error) {
             throw error;
         }
@@ -85,22 +94,38 @@ class BaseService {
     async getPaginated(payload = {}, returnOption = {}) {
         try {
             const { skip = 0, limit = 10, filters = {} } = payload;
-            filters.isDeleted = { $ne: true }; 
+            
+            // Add logic to exclude soft-deleted records
+            filters.deletedAt = null;
 
-            const [data, total] = await Promise.all([
-                this.model.find(filters)
-                    .skip(skip)
-                    .limit(limit)
-                    .lean(returnOption.lean || false)
-                    .select(returnOption.select || '')
-                    .exec(),
-                this.model.countDocuments(filters).exec(),
-            ]);
+            const { count, rows } = await this.model.findAndCountAll({
+                where: filters,
+                offset: skip,
+                limit: limit,
+                ...this._processReturnOptions(returnOption)
+            });
 
-            return { data, total };
+            return { data: rows, total: count };
         } catch (error) {
             throw error;
         }
+    }
+
+    // Helper method to process return options
+    _processReturnOptions(returnOption = {}) {
+        const options = {};
+        
+        // Handle select fields (Sequelize uses 'attributes')
+        if (returnOption.select) {
+            options.attributes = returnOption.select.split(' ').filter(field => field);
+        }
+        
+        // Handle include associations if needed
+        if (returnOption.include) {
+            options.include = returnOption.include;
+        }
+        
+        return options;
     }
 }
 

@@ -1,14 +1,21 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const UserModel = require('../modules/User/User.model');
+const User = require('../modules/User/User.model');
+const Role = require('../modules/Roles/Role.model');
 
 const generateToken = async (user) => {
-    const userWithRole = await UserModel.findById(user._id).populate('roleId');
-    const permissions = userWithRole?.roleId?.permissions || [];
+    const userWithRole = await User.findByPk(user.id, {
+        include: [{
+            model: Role,
+            as: 'role'
+        }]
+    });
+    
+    const permissions = userWithRole?.role?.permissions || [];
 
     const payload = {
         name: user.username,
-        id: user._id,
+        id: user.id,
         email: user.email,  
         permissions
     };
@@ -34,6 +41,5 @@ const verifyToken = (token) => {
         return null;
     }
 };
-
 
 module.exports = { generateToken, verifyToken };
