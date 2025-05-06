@@ -86,7 +86,7 @@ class UserController extends BaseController {
         token,
         user: {
             name: user.username,
-            id: user._id,
+            id: user.id,
             permissions: user.roleId?.permissions || [],
         }
     });

@@ -15,45 +15,55 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: true,
-        unique: true
+        unique: true,
+        validate: {
+          isEmail: true
+        }
       },
-      passwordHash: {
+      password_hash: {
         type: Sequelize.STRING,
         allowNull: false
+      },
+      role_id: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: 'roles',
+          key: 'id'
+        }
       },
       status: {
         type: Sequelize.BOOLEAN,
         defaultValue: true
       },
-      roleId: {
-        type: Sequelize.UUID,
-        references: {
-          model: 'roles',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+      created_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.fn('now')
       },
-      createdBy: {
+      updated_at: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.fn('now')
+      },
+      created_by: {
+        type: Sequelize.STRING
+      },
+      updated_by: {
+        type: Sequelize.STRING
+      },
+      deleted_at: {
         type: Sequelize.DATE
-      },
-      updatedBy: {
-        type: Sequelize.DATE
-      },
-      createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false
-      },
-      deletedAt: {
-        type: Sequelize.DATE,
-        allowNull: true
       }
+    }, {
+      // Automatically adds `timestamps` and `paranoid` to the table
+      timestamps: true,
+      paranoid: true,
+      underscored: true,
     });
   },
+
+
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('users');
   }

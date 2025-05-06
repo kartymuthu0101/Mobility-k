@@ -40,7 +40,7 @@ class RoleController extends BaseController {
 
     getById = async (req, res) => {
         const { id } = req.params;
-        const data = await this.RoleService.getOne({ _id: id });
+        const data = await this.RoleService.getOne({ id: id });
         this.sendResponse(
             req,
             res,

@@ -83,9 +83,11 @@ class BaseService {
             if (!instance) {
                 throw new Error('Record not found');
             }
-            
-            // Use Sequelize paranoid delete (soft delete)
-            return await instance.destroy();
+    
+            // Optional: Update isDeleted before soft deleting
+            await instance.update({ isDeleted: true });
+    
+            return await instance.destroy(); // Soft delete
         } catch (error) {
             throw error;
         }
@@ -94,23 +96,29 @@ class BaseService {
     async getPaginated(payload = {}, returnOption = {}) {
         try {
             const { skip = 0, limit = 10, filters = {} } = payload;
-            
-            // Add logic to exclude soft-deleted records
-            filters.deletedAt = null;
-
+    
+            const where = {
+                deletedAt: null,
+            };
+    
+            if (filters.search) {
+                where.name = { [Op.iLike]: `%${filters.search}%` };
+                delete filters.search;
+            }
+            Object.assign(where, filters);
+    
             const { count, rows } = await this.model.findAndCountAll({
-                where: filters,
+                where,
                 offset: skip,
-                limit: limit,
-                ...this._processReturnOptions(returnOption)
+                limit,
+                ...this._processReturnOptions(returnOption),
             });
-
+    
             return { data: rows, total: count };
         } catch (error) {
             throw error;
         }
     }
-
     // Helper method to process return options
     _processReturnOptions(returnOption = {}) {
         const options = {};

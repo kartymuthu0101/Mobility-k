@@ -128,7 +128,7 @@ RoleRouter.get('/getAll', [verifyToken] ,errHandle(roleController.getAll));
  *               message: "Role created successfully"
  *               data:
  *                 _id: "60af8841d3e2f8a9c4567e13"
- *                 name: "Admin"
+ *                 name: "Admin3"
  *                 description: "Administrator role with full access"
  *                 permissions: ["create", "edit", "delete", "view"]
  *                 status: true
@@ -292,8 +292,7 @@ RoleRouter.post('/create', [verifyToken, validator.roleCreateInput], errHandle(r
  *         required: true
  *         schema:
  *           type: string
- *           pattern: "^[a-fA-F0-9]{24}$"
- *           example: "60af8841d3e2f8a9c4567e13"
+ *           example: "68d5e329-d9bb-4393-b919-8683df04a6a5"
  *     responses:
  *       200:
  *         description: Role retrieved successfully
@@ -346,9 +345,9 @@ RoleRouter.post('/create', [verifyToken, validator.roleCreateInput], errHandle(r
  *     Role:
  *       type: object
  *       properties:
- *         _id:
+ *         id:
  *           type: string
- *           example: "60af8841d3e2f8a9c4567e13"
+ *           example: "68d5e329-d9bb-4393-b919-8683df04a6a5"
  *         name:
  *           type: string
  *           example: "Admin"
@@ -396,8 +395,7 @@ RoleRouter.get('/getById/:id', [verifyToken],errHandle(roleController.getById));
  *         required: true
  *         schema:
  *           type: string
- *           pattern: "^[a-fA-F0-9]{24}$"
- *           example: "60af8841d3e2f8a9c4567e13"
+ *           example: "b9210605-910d-4149-9293-664a4a6c47c6"
  *     requestBody:
  *       required: true
  *       content:
@@ -409,7 +407,7 @@ RoleRouter.get('/getById/:id', [verifyToken],errHandle(roleController.getById));
  *                 type: string
  *                 minLength: 3
  *                 maxLength: 50
- *                 example: "Admin"
+ *                 example: "Admin1"
  *               description:
  *                 type: string
  *                 minLength: 6
@@ -430,7 +428,7 @@ RoleRouter.get('/getById/:id', [verifyToken],errHandle(roleController.getById));
  *               statusCode: 200
  *               message: "Role updated"
  *               data:
- *                 _id: "60af8841d3e2f8a9c4567e13"
+ *                 id: "68d5e329-d9bb-4393-b919-8683df04a6a5"
  *                 name: "Admin"
  *                 description: "Updated description of the admin role"
  *                 permissions: ["read", "update"]
@@ -528,8 +526,7 @@ RoleRouter.put('/update/:id', [verifyToken,validator.roleUpdateInput], errHandle
  *         description: MongoDB ObjectId of the role to delete
  *         schema:
  *           type: string
- *           pattern: "^[a-fA-F0-9]{24}$"
- *           example: "60af8841d3e2f8a9c4567e13"
+ *           example: "68d5e329-d9bb-4393-b919-8683df04a6a5"
  *     responses:
  *       200:
  *         description: Role deleted successfully

@@ -3,42 +3,50 @@ const { sequelize } = require('../../utils/connectDb');
 
 const Role = sequelize.define('Role', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
     },
     name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
     },
     description: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false
     },
     permissions: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        defaultValue: []
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: []
     },
     status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     },
-    created_by: {
-        type: DataTypes.STRING
+    createdBy: {
+      type: DataTypes.STRING,
+      field: 'created_by'
     },
-    updated_by: {
-        type: DataTypes.STRING
+    updatedBy: {
+      type: DataTypes.STRING,
+      field: 'updated_by'
+    },
+    isDeleted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      field: 'is_deleted'
     }
-}, {
+  }, {
     tableName: 'roles',
-    timestamps: true,
-    paranoid: true, // Adds deletedAt for soft deletes
+    timestamps: true,  // Automatically handles createdAt, updatedAt
+    paranoid: true,    // Automatically handles deletedAt for soft deletes
+    underscored: true, // Uses snake_case for field names in the database
     defaultScope: {
-        where: {
-            deletedAt: null
-        }
+      where: {
+        deletedAt: null
+      }
     }
-});
+  });
 
 module.exports = Role;

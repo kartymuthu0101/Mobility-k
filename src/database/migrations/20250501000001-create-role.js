@@ -31,20 +31,31 @@ module.exports = {
       updated_by: {
         type: Sequelize.STRING
       },
-      createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false
+      deleted_at: {
+        type: Sequelize.DATE
       },
-      updatedAt: {
+      created_at: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: Sequelize.fn('now')
       },
-      deletedAt: {
+      updated_at: {
         type: Sequelize.DATE,
-        allowNull: true
+        allowNull: false,
+        defaultValue: Sequelize.fn('now')
+      },
+      is_deleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       }
+    }, {
+      // Automatically handles timestamps (createdAt, updatedAt) and paranoid (deletedAt)
+      timestamps: true,
+      paranoid: true,
+      underscored: true
     });
   },
+
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('roles');
   }

@@ -99,8 +99,8 @@ userRouter.post('/create', [validator.userCreateInput], userController.create);
  *             RegularPayload:
  *               summary: Regular login payload
  *               value:
- *                 email: "teja.doodleblue@gmail.com"
- *                 password: "Teja@123"
+ *                 email: "admin@gmail.com"
+ *                 password: "Admin@123"
  *             EncryptedPayload:
  *               summary: Encrypted login input
  *               value:

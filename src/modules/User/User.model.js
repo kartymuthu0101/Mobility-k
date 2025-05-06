@@ -2,54 +2,64 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../../utils/connectDb');
 const bcrypt = require('bcrypt');
 
+
 const User = sequelize.define('User', {
     id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true
     },
     username: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false
     },
     email: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        unique: true,
-        validate: {
-            isEmail: true
-        }
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+      validate: {
+        isEmail: true
+      }
     },
     passwordHash: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: 'password_hash'
+    },
+    roleId: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      field: 'role_id',
+      references: {
+        model: 'roles',
+        key: 'id'
+      }
     },
     status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
     },
     createdBy: {
-        type: DataTypes.DATE
+      type: DataTypes.STRING,
+      field: 'created_by'
     },
     updatedBy: {
-        type: DataTypes.DATE
-    }
-}, {
+      type: DataTypes.STRING,
+      field: 'updated_by'
+    },
+  }, {
     tableName: 'users',
     timestamps: true,
-    paranoid: true, // This will add deletedAt for soft deletes
-    defaultScope: {
-        where: {
-            deletedAt: null
-        }
-    }
-});
+    paranoid: true,  
+    underscored: true, 
+  });
 
 // Instance method for comparing password
 User.prototype.comparePassword = async function(password) {
-    return bcrypt.compare(password, this.passwordHash);
+  console.log('Comparing:', password, 'with hash:', this.passwordHash);
+  console.log( await bcrypt.compare(password, this.passwordHash))
+  return await bcrypt.compare(password, this.passwordHash);
 };
-
 // Hook for hashing password before save
 User.beforeCreate(async (user) => {
     if (user.changed('passwordHash')) {

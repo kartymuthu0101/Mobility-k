@@ -11,11 +11,12 @@ module.exports = {
         logging: process.env.NODE_ENV === 'development' ? console.log : false,
         define: {
             timestamps: true,
-            underscored: true,
+            underscored: false,
             paranoid: true // This will create deletedAt when you "delete" a record
         }
     },
     encryptKey: process.env.ENCRYPTION_KEY,
     swaggerBaseUrl: process.env.SWAGGER_BASE_URL,
-    isEncryptionEnabled: +process.env.IS_ENCRYPTION_ENABLE
+    isEncryptionEnabled: +process.env.IS_ENCRYPTION_ENABLE,
+    forceDbSync: process.env.FORCE_DB_SYNC === 'true'
 }
